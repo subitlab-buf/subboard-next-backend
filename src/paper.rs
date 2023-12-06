@@ -6,7 +6,16 @@ use tracing::{error, info};
 
 use crate::Global;
 
-#[derive(Debug, Clone)]
+#[derive(
+    Debug, Clone, Copy, PartialEq, Eq, serde_repr::Serialize_repr, serde_repr::Deserialize_repr,
+)]
+#[repr(u8)]
+enum Status {
+    Pending,
+    Approved,
+}
+
+#[derive(Debug, Clone, Serialize)]
 pub struct Paper {
     /// Paper author's name.
     name: String,
@@ -15,30 +24,68 @@ pub struct Paper {
     /// Paper author's email.
     email: Option<lettre::Address>,
 
+    /// Only identifier of this paper.
     pid: u64,
+    /// Post time
     time: DateTime<Utc>,
+
+    status: Status,
 }
 
 /// Paper from frontend.
-#[derive(Serialize, Deserialize, Hash)]
-pub struct Raw {
+#[derive(Debug, Deserialize, Hash)]
+pub struct In {
     name: String,
     info: String,
     email: Option<lettre::Address>,
 }
 
+/// Paper to frontend.
+#[derive(Debug, Serialize)]
+pub struct Out {
+    name: String,
+    info: String,
+    email: Option<lettre::Address>,
+    pid: u64,
+    time: DateTime<Utc>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+struct Store {
+    name: String,
+    info: String,
+    email: Option<lettre::Address>,
+    time: DateTime<Utc>,
+}
+
 impl Paper {
-    fn to_raw(&self) -> Raw {
-        Raw {
+    #[inline]
+    fn approve(&mut self) {
+        self.status = Status::Approved;
+    }
+
+    fn to_out(&self) -> Out {
+        Out {
             name: self.name.clone(),
             info: self.info.clone(),
             email: self.email.clone(),
+            pid: self.pid,
+            time: self.time,
+        }
+    }
+
+    fn to_store(&self) -> Store {
+        Store {
+            name: self.name.clone(),
+            info: self.info.clone(),
+            email: self.email.clone(),
+            time: self.time,
         }
     }
 }
 
-impl From<Raw> for Paper {
-    fn from(value: Raw) -> Self {
+impl From<In> for Paper {
+    fn from(value: In) -> Self {
         let hash = {
             use std::collections::hash_map::DefaultHasher;
             use std::hash::{Hash, Hasher};
@@ -54,6 +101,7 @@ impl From<Raw> for Paper {
             email: value.email,
             pid: hash,
             time: Utc::now(),
+            status: Status::Pending,
         }
     }
 }
@@ -65,31 +113,31 @@ impl dmds::Data for Paper {
     fn dim(&self, dim: usize) -> u64 {
         match dim {
             0 => self.pid,
-            1 => self.time.timestamp() as u64,
+            1 => self.status as u8 as u64,
             _ => unreachable!(),
         }
     }
 
     fn decode<B: bytes::Buf>(dims: &[u64], buf: B) -> std::io::Result<Self> {
-        let inner: Raw = bincode::deserialize_from(buf.reader())
+        let inner: Store = bincode::deserialize_from(buf.reader())
             .map_err(|err| std::io::Error::new(std::io::ErrorKind::Other, err))?;
 
         Ok(Self {
             name: inner.name,
             info: inner.info,
             email: inner.email,
+            time: inner.time,
             pid: dims[0],
-            time: DateTime::from_timestamp(dims[1] as i64, 0).ok_or_else(|| {
-                std::io::Error::new(
-                    std::io::ErrorKind::Other,
-                    format!("unable to create a DateTime from timestamp {}", dims[1]),
-                )
-            })?,
+            status: if dims[1] as u8 == Status::Pending as u8 {
+                Status::Pending
+            } else {
+                Status::Approved
+            },
         })
     }
 
     fn encode<B: bytes::BufMut>(&self, buf: B) -> std::io::Result<()> {
-        bincode::serialize_into(buf.writer(), &self.to_raw())
+        bincode::serialize_into(buf.writer(), &self.to_store())
             .map_err(|err| std::io::Error::new(std::io::ErrorKind::Other, err))
     }
 }
@@ -102,6 +150,8 @@ pub enum Error {
     PidConflict,
     #[error("paper repository is empty")]
     NoPaper,
+    #[error("requiring paper not found")]
+    NotFound,
 }
 
 impl IntoResponse for Error {
@@ -115,7 +165,7 @@ impl IntoResponse for Error {
             match self {
                 Error::Db => StatusCode::INTERNAL_SERVER_ERROR,
                 Error::PidConflict => StatusCode::CONFLICT,
-                Error::NoPaper => StatusCode::NOT_FOUND,
+                Error::NoPaper | Error::NotFound => StatusCode::NOT_FOUND,
             },
             Json(JErr {
                 error: self.to_string(),
@@ -126,8 +176,8 @@ impl IntoResponse for Error {
 }
 
 pub async fn post<Io: IoHandle>(
-    Json(paper): Json<Raw>,
     State(Global { papers, .. }): State<Global<Io>>,
+    Json(paper): Json<In>,
 ) -> Result<(), Error> {
     let paper: Paper = paper.into();
     let pid = paper.pid;
@@ -140,27 +190,98 @@ pub async fn post<Io: IoHandle>(
 
 pub async fn get<Io: IoHandle>(
     State(Global { papers, .. }): State<Global<Io>>,
-) -> Result<Json<Raw>, Error> {
-    let select = papers.select_all();
-    let pids: Vec<u64> = select
-        .iter()
-        .filter_map(|e| e.ok().map(|lazy| lazy.id()))
-        .collect()
-        .await;
-    let pid = pids
-        .get(fastrand::usize(..pids.len()))
-        .copied()
-        .ok_or(Error::NoPaper)?;
+) -> Result<Json<Paper>, Error> {
+    let select = papers.select(1, Status::Approved as u8 as u64);
+    let pid = fastrand::choice(
+        select
+            .iter()
+            .filter_map(|e| e.ok().map(|lazy| lazy.id()))
+            .collect::<Vec<u64>>()
+            .await
+            .into_iter(),
+    )
+    .ok_or(Error::NoPaper)?;
 
     let select = papers.select(0, pid).hint(pid);
-    let mut iter = select.iter();
-    while let Some(Ok(lazy)) = iter.next().await {
+    let mut papers_iter = select.iter();
+    while let Some(Ok(lazy)) = papers_iter.next().await {
         if lazy.id() == pid {
             if let Ok(val) = lazy.get().await {
-                return Ok(Json(val.to_raw()));
+                return Ok(Json(val.clone()));
             }
         }
     }
 
     Err(Error::Db)
+}
+
+pub async fn unprocessed<Io: IoHandle>(
+    State(Global { papers, .. }): State<Global<Io>>,
+) -> Json<Vec<Out>> {
+    let select = papers.select(1, Status::Pending as u8 as u64);
+    let mut papers_iter = select.iter();
+
+    let mut ret = Vec::new();
+    while let Some(Ok(lazy)) = papers_iter.next().await {
+        if let Ok(val) = lazy.get().await {
+            if val.status == Status::Pending {
+                ret.push(val.to_out());
+            }
+        }
+    }
+    Json(ret)
+}
+
+#[derive(Deserialize, Debug)]
+pub struct ApprRejReq {
+    pid: u64,
+}
+
+pub async fn approve<Io: IoHandle>(
+    State(Global { papers, .. }): State<Global<Io>>,
+    Json(ApprRejReq { pid }): Json<ApprRejReq>,
+) -> Result<(), Error> {
+    let select = papers
+        .select(0, pid)
+        .and(1, Status::Pending as u8 as u64)
+        .hint(pid);
+    let mut papers_iter = select.iter();
+
+    while let Some(Ok(mut lazy)) = papers_iter.next().await {
+        if lazy.id() == pid {
+            if let Ok(paper) = lazy.get_mut().await {
+                info!("approving paper {pid}");
+                paper.approve();
+                return lazy.close().await.map_err(|err| {
+                    error!("failed to approve paper: {err}");
+                    Error::Db
+                });
+            }
+        }
+    }
+
+    Err(Error::NotFound)
+}
+
+pub async fn reject<Io: IoHandle>(
+    State(Global { papers, .. }): State<Global<Io>>,
+    Json(ApprRejReq { pid }): Json<ApprRejReq>,
+) -> Result<(), Error> {
+    let select = papers
+        .select(0, pid)
+        .and(1, Status::Pending as u8 as u64)
+        .hint(pid);
+    let mut papers_iter = select.iter();
+
+    while let Some(Ok(lazy)) = papers_iter.next().await {
+        if lazy.id() == pid {
+            info!("rejecting paper {pid}");
+            return lazy.destroy().await.map_err(|err| {
+                error!("failed to remove paper: {err}");
+                Error::Db
+            });
+        }
+    }
+
+    Err(Error::NotFound)
 }

@@ -1,17 +1,23 @@
 use std::{path::PathBuf, sync::Arc};
 
-use axum::Router;
+use axum::{
+    routing::{get, post},
+    Router,
+};
 use dmds::IoHandle;
+use dmds_tokio_fs::FsHandle;
 use paper::Paper;
-use serde::{Deserialize, Serialize};
+use question::Question;
+use serde::Deserialize;
 
 mod paper;
-mod questions;
+mod question;
 
 #[derive(Debug)]
 pub struct Global<Io: IoHandle> {
     config: Arc<Config>,
     papers: Arc<dmds::World<Paper, 2, Io>>,
+    questions: Arc<dmds::World<Question, 1, Io>>,
 }
 
 impl<Io: IoHandle> Clone for Global<Io> {
@@ -20,6 +26,7 @@ impl<Io: IoHandle> Clone for Global<Io> {
         Self {
             config: self.config.clone(),
             papers: self.papers.clone(),
+            questions: self.questions.clone(),
         }
     }
 }
@@ -28,6 +35,16 @@ impl<Io: IoHandle> Clone for Global<Io> {
 struct Config {
     db_path: PathBuf,
     port: u32,
+
+    /// Root secret mapping.
+    mng_secret: String,
+    /// Secret mapping for management clients to get
+    /// all unprocessed papers.
+    mng_get_papers_secret: String,
+    /// Secret mapping for management clients to approve papers.
+    mng_approve_papers_secret: String,
+    /// Secret mapping for management clients to reject papers.
+    mng_reject_papers_secret: String,
 }
 
 #[tokio::main]
@@ -49,15 +66,44 @@ async fn main() {
     let mut paper_path = config.db_path.clone();
     paper_path.push("papers");
 
+    let mut questions_path = config.db_path.clone();
+    questions_path.push("questions");
+
+    let config = Arc::new(config);
+
     let state = Global {
-        config: Arc::new(config),
+        config: config.clone(),
         papers: Arc::new(dmds::world! {
-            // 32chunks, 1chunk
-            dmds_tokio_fs::FsHandle::new(paper_path, true), 576460752303423488 | .., 18446744073709551615 | ..
+            // 32 chunks, 1 chunk
+            dmds_tokio_fs::FsHandle::new(paper_path, false), 1152921504606846976 | ..u64::MAX, 1 | ..2
+        }),
+        questions: Arc::new(dmds::world! {
+            // 32 chunks
+            dmds_tokio_fs::FsHandle::new(questions_path, true), 1152921504606846976 | ..u64::MAX
         }),
     };
 
-    let router = Router::new().with_state(state);
+    let router: Router<()> = Router::new()
+        .route("/questions/new", post(question::new::<FsHandle>))
+        .route("/paper/post", post(paper::post::<FsHandle>))
+        .route("/paper/get", get(paper::get::<FsHandle>))
+        .route(
+            &format!("/{}/{}", config.mng_secret, config.mng_get_papers_secret),
+            get(paper::unprocessed::<FsHandle>),
+        )
+        .route(
+            &format!(
+                "/{}/{}",
+                config.mng_secret, config.mng_approve_papers_secret
+            ),
+            post(paper::approve::<FsHandle>),
+        )
+        .route(
+            &format!("/{}/{}", config.mng_secret, config.mng_reject_papers_secret),
+            post(paper::reject::<FsHandle>),
+        )
+        .with_state(state);
+
     axum::serve(
         tokio::net::TcpListener::bind(format!("127.0.0.1:{port}"))
             .await
@@ -66,11 +112,4 @@ async fn main() {
     )
     .await
     .unwrap();
-}
-
-#[derive(Serialize)]
-pub struct ResponseWithMsg {
-    code: u16,
-    #[serde(rename = "message")]
-    msg: String,
 }

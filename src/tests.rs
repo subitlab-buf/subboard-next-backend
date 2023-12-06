@@ -1,10 +1,12 @@
 use std::{path::PathBuf, sync::Arc};
 
 use axum::{
+    body::Body,
     http::{self, Request},
     Router,
 };
-use dmds::mem_io_handle::MemStorage;
+use dmds::{mem_io_handle::MemStorage, StreamExt};
+use http_body_util::BodyExt;
 use tower::ServiceExt;
 
 use crate::{paper, question, Config, Global};
@@ -48,7 +50,7 @@ fn router() -> (Global<MemStorage>, Router) {
 
 #[tokio::test]
 async fn new_question() {
-    let (_, route) = router();
+    let (state, route) = router();
     let question = question::In {
         name: "Yjn024".to_owned(),
         info: "Hello, world!".to_owned(),
@@ -59,7 +61,7 @@ async fn new_question() {
         .oneshot(
             Request::builder()
                 .uri("/questions/new")
-                .method("POST")
+                .method(http::Method::POST)
                 .header(http::header::CONTENT_TYPE, mime::APPLICATION_JSON.as_ref())
                 .body(serde_json::to_string(&question).unwrap())
                 .unwrap()
@@ -68,4 +70,161 @@ async fn new_question() {
         .unwrap()
         .status()
         .is_success());
+
+    let select = state.questions.select_all();
+    let mut iter = select.iter();
+
+    while let Some(Ok(lazy)) = iter.next().await {
+        if let Ok(question::Question {
+            name, info, email, ..
+        }) = lazy.get().await
+        {
+            assert_eq!(name, "Yjn024");
+            assert_eq!(info, "Hello, world!");
+            assert!(email.is_none());
+
+            return;
+        }
+    }
+    unreachable!("data not inserted");
+}
+
+#[tokio::test]
+async fn post_paper() {
+    let (state, route) = router();
+    let paper = paper::In {
+        name: "Yjn024".to_owned(),
+        info: "Hello, world!".to_owned(),
+        email: None,
+    };
+
+    assert!(route
+        .oneshot(
+            Request::builder()
+                .uri("/paper/post")
+                .method(http::Method::POST)
+                .header(http::header::CONTENT_TYPE, mime::APPLICATION_JSON.as_ref())
+                .body(serde_json::to_string(&paper).unwrap())
+                .unwrap()
+        )
+        .await
+        .unwrap()
+        .status()
+        .is_success());
+
+    let select = state.papers.select(1, paper::Status::Pending as u8 as u64);
+    let mut iter = select.iter();
+
+    while let Some(Ok(lazy)) = iter.next().await {
+        if let Ok(paper::Paper {
+            name,
+            info,
+            email,
+            status,
+            ..
+        }) = lazy.get().await
+        {
+            assert_eq!(name, "Yjn024");
+            assert_eq!(info, "Hello, world!");
+            assert!(email.is_none());
+            assert_eq!(*status, paper::Status::Pending);
+
+            return;
+        }
+    }
+    unreachable!("data not inserted");
+}
+
+#[tokio::test]
+async fn get_paper() {
+    let (state, route) = router();
+    let paper = paper::In {
+        name: "Yjn024".to_owned(),
+        info: "Hello, world!".to_owned(),
+        email: None,
+    };
+    state.papers.insert(paper.into()).await.unwrap();
+
+    assert!(!route
+        .clone()
+        .oneshot(
+            Request::builder()
+                .uri("/paper/get")
+                .method(http::Method::GET)
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await
+        .unwrap()
+        .status()
+        .is_success());
+
+    let paper = paper::In {
+        name: "Yjn024".to_owned(),
+        info: "Genshine Impact".to_owned(),
+        email: None,
+    };
+    let mut paper: paper::Paper = paper.into();
+    paper.status = paper::Status::Approved;
+    state.papers.insert(paper.into()).await.unwrap();
+
+    let res = route
+        .oneshot(
+            Request::builder()
+                .uri("/paper/get")
+                .method(http::Method::GET)
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+    assert!(res.status().is_success());
+    let paper::Out {
+        name, info, email, ..
+    } = serde_json::from_slice(&res.into_body().collect().await.unwrap().to_bytes()).unwrap();
+    assert_eq!(name, "Yjn024");
+    assert_eq!(info, "Genshine Impact");
+    assert!(email.is_none());
+}
+
+#[tokio::test]
+async fn unprocessed_papers() {
+    let (state, route) = router();
+    let paper = paper::In {
+        name: "Yjn024".to_owned(),
+        info: "Genshine Impact".to_owned(),
+        email: None,
+    };
+    let mut paper: paper::Paper = paper.into();
+    paper.status = paper::Status::Approved;
+    state.papers.insert(paper.into()).await.unwrap();
+
+    let paper = paper::In {
+        name: "Yjn024".to_owned(),
+        info: "Hello, world!".to_owned(),
+        email: None,
+    };
+    state.papers.insert(paper.into()).await.unwrap();
+
+    let paper = paper::In {
+        name: "c191239".to_owned(),
+        info: "Hello, world!".to_owned(),
+        email: None,
+    };
+    state.papers.insert(paper.into()).await.unwrap();
+
+    let res = route
+        .oneshot(
+            Request::builder()
+                .uri("/secret/get_papers")
+                .method(http::Method::GET)
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+    assert!(res.status().is_success());
+    let res: Vec<paper::Out> =
+        serde_json::from_slice(&res.into_body().collect().await.unwrap().to_bytes()).unwrap();
+    assert_eq!(res.len(), 2)
 }

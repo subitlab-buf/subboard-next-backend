@@ -41,12 +41,12 @@ pub struct In {
 }
 
 /// Paper to frontend.
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Out {
-    name: String,
-    info: String,
-    email: Option<lettre::Address>,
-    pid: u64,
+    pub name: String,
+    pub info: String,
+    pub email: Option<lettre::Address>,
+    pub pid: u64,
     time: DateTime<Utc>,
 }
 

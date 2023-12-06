@@ -265,7 +265,7 @@ dependencies = [
 [[package]]
 name = "dmds"
 version = "0.1.0"
-source = "git+https://github.com/DM-Earth/dmds.git#8f83aac682bc2593b7e641cfccc488451ef0ade2"
+source = "git+https://github.com/DM-Earth/dmds.git#d295bc00092326dd9466462f2a56a0c235a37cab"
 dependencies = [
  "async-lock",
  "async-trait",
@@ -278,7 +278,7 @@ dependencies = [
 [[package]]
 name = "dmds-tokio-fs"
 version = "0.1.0"
-source = "git+https://github.com/DM-Earth/dmds.git#8f83aac682bc2593b7e641cfccc488451ef0ade2"
+source = "git+https://github.com/DM-Earth/dmds.git#d295bc00092326dd9466462f2a56a0c235a37cab"
 dependencies = [
  "async-trait",
  "bytes",
@@ -1031,11 +1031,14 @@ dependencies = [
  "dmds-tokio-fs",
  "fastrand",
  "lettre",
+ "mime",
  "serde",
+ "serde_json",
  "serde_repr",
  "thiserror",
  "tokio",
  "toml",
+ "tower",
  "tracing",
  "tracing-subscriber",
 ]

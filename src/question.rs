@@ -6,11 +6,11 @@ use serde::{Deserialize, Serialize};
 use crate::Global;
 
 /// Question from frontend.
-#[derive(Debug, Clone, Deserialize, Hash)]
+#[derive(Debug, Clone, Serialize, Deserialize, Hash)]
 pub struct In {
-    name: String,
-    info: String,
-    email: Option<lettre::Address>,
+    pub name: String,
+    pub info: String,
+    pub email: Option<lettre::Address>,
 }
 
 /// Feedback to SubIT.

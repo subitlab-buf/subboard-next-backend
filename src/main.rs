@@ -13,6 +13,9 @@ use serde::Deserialize;
 mod paper;
 mod question;
 
+#[cfg(test)]
+mod tests;
+
 #[derive(Debug)]
 pub struct Global<Io: IoHandle> {
     config: Arc<Config>,
@@ -75,11 +78,11 @@ async fn main() {
         config: config.clone(),
         papers: Arc::new(dmds::world! {
             // 32 chunks, 1 chunk
-            dmds_tokio_fs::FsHandle::new(paper_path, false), 1152921504606846976 | ..u64::MAX, 1 | ..2
+            dmds_tokio_fs::FsHandle::new(paper_path, false), 1152921504606846976 | ..=u64::MAX, 1 | ..=1
         }),
         questions: Arc::new(dmds::world! {
             // 32 chunks
-            dmds_tokio_fs::FsHandle::new(questions_path, true), 1152921504606846976 | ..u64::MAX
+            dmds_tokio_fs::FsHandle::new(questions_path, true), 1152921504606846976 | ..=u64::MAX
         }),
     };
 

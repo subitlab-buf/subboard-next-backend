@@ -10,7 +10,7 @@ use crate::Global;
     Debug, Clone, Copy, PartialEq, Eq, serde_repr::Serialize_repr, serde_repr::Deserialize_repr,
 )]
 #[repr(u8)]
-enum Status {
+pub enum Status {
     Pending,
     Approved,
 }
@@ -18,26 +18,26 @@ enum Status {
 #[derive(Debug, Clone, Serialize)]
 pub struct Paper {
     /// Paper author's name.
-    name: String,
+    pub name: String,
     /// Paper content.
-    info: String,
+    pub info: String,
     /// Paper author's email.
-    email: Option<lettre::Address>,
+    pub email: Option<lettre::Address>,
 
     /// Only identifier of this paper.
-    pid: u64,
+    pub pid: u64,
     /// Post time
     time: DateTime<Utc>,
 
-    status: Status,
+    pub status: Status,
 }
 
 /// Paper from frontend.
-#[derive(Debug, Deserialize, Hash)]
+#[derive(Debug, Serialize, Deserialize, Hash)]
 pub struct In {
-    name: String,
-    info: String,
-    email: Option<lettre::Address>,
+    pub name: String,
+    pub info: String,
+    pub email: Option<lettre::Address>,
 }
 
 /// Paper to frontend.
@@ -224,9 +224,7 @@ pub async fn unprocessed<Io: IoHandle>(
     let mut ret = Vec::new();
     while let Some(Ok(lazy)) = papers_iter.next().await {
         if let Ok(val) = lazy.get().await {
-            if val.status == Status::Pending {
-                ret.push(val.to_out());
-            }
+            ret.push(val.to_out());
         }
     }
     Json(ret)

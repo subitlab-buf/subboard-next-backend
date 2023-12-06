@@ -1,0 +1,8 @@
+db_path = "./db"
+port = 8080
+
+# Secret mappings
+mng_secret = "secret"
+mng_get_papers_secret = "secret"
+mng_approve_papers_secret = "secret"
+mng_reject_papers_secret = "secret"

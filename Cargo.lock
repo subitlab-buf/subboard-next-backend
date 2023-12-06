@@ -252,8 +252,9 @@ dependencies = [
 
 [[package]]
 name = "dmds"
-version = "0.1.0"
-source = "git+https://github.com/DM-Earth/dmds.git#d295bc00092326dd9466462f2a56a0c235a37cab"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4af1766a337392440cba2e9716800e411acba9f3790fad295108407b91f861a8"
 dependencies = [
  "async-lock",
  "async-trait",
@@ -266,7 +267,8 @@ dependencies = [
 [[package]]
 name = "dmds-tokio-fs"
 version = "0.1.0"
-source = "git+https://github.com/DM-Earth/dmds.git#d295bc00092326dd9466462f2a56a0c235a37cab"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "981ca5a3128aac81d7ee7449735330079602a4f04d63793b5eb97d56b597f6ec"
 dependencies = [
  "async-trait",
  "bytes",
@@ -750,9 +752,9 @@ dependencies = [
 
 [[package]]
 name = "mio"
-version = "0.8.9"
+version = "0.8.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3dce281c5e46beae905d4de1870d8b1509a9142b62eedf18b443b011ca8343d0"
+checksum = "8f3d0b296e374a4e6f3c7b0a1f5a51d748a0d34c85e7dc48fc3fa9a87657fe09"
 dependencies = [
  "libc",
  "wasi",

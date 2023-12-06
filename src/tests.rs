@@ -4,7 +4,7 @@ use axum::{
     http::{self, Request},
     Router,
 };
-use dmds::mem_io_handle::MemStorage;
+use dmds::{mem_io_handle::MemStorage, StreamExt};
 use tower::ServiceExt;
 
 use crate::{paper, question, Config, Global};
@@ -68,4 +68,21 @@ async fn new_question() {
         .unwrap()
         .status()
         .is_success());
+
+    let select = state.questions.select_all();
+    let mut iter = select.iter();
+
+    while let Some(Ok(lazy)) = iter.next().await {
+        if let Ok(question::Question {
+            name, info, email, ..
+        }) = lazy.get().await
+        {
+            assert_eq!(name, "Yjn024");
+            assert_eq!(info, "Hello, world!");
+            assert!(email.is_none());
+
+            return;
+        }
+    }
+    unreachable!("data not inserted");
 }

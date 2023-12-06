@@ -17,13 +17,13 @@ pub struct In {
 #[derive(Debug)]
 pub struct Question {
     /// Name of the questioner.
-    name: String,
+    pub name: String,
     /// Content of the question.
-    info: String,
+    pub info: String,
     /// Email address of the questioner.
-    email: Option<lettre::Address>,
+    pub email: Option<lettre::Address>,
 
-    pid: u64,
+    pub pid: u64,
     time: DateTime<Utc>,
 }
 

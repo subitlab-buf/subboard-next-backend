@@ -230,9 +230,9 @@ pub async fn unprocessed<Io: IoHandle>(
     Json(ret)
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct ApprRejReq {
-    pid: u64,
+    pub pid: u64,
 }
 
 pub async fn approve<Io: IoHandle>(

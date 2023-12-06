@@ -228,3 +228,42 @@ async fn unprocessed_papers() {
         serde_json::from_slice(&res.into_body().collect().await.unwrap().to_bytes()).unwrap();
     assert_eq!(res.len(), 2)
 }
+
+#[tokio::test]
+async fn approve_paper() {
+    let (state, route) = router();
+    let paper: paper::Paper = paper::In {
+        name: "Yjn024".to_owned(),
+        info: "Genshine Impact".to_owned(),
+        email: None,
+    }
+    .into();
+    let pid = paper.pid;
+    state.papers.insert(paper).await.unwrap();
+
+    assert!(route
+        .oneshot(
+            Request::builder()
+                .uri("/secret/get_papers")
+                .method(http::Method::GET)
+                .body(serde_json::to_string(&paper::ApprRejReq { pid }).unwrap())
+                .unwrap(),
+        )
+        .await
+        .unwrap()
+        .status()
+        .is_success());
+
+    let select = state
+        .papers
+        .select(0, pid)
+        .and(1, paper::Status::Approved as u8 as u64);
+    let mut iter = select.iter();
+
+    while let Some(Ok(lazy)) = iter.next().await {
+        if let Ok(paper) = lazy.get().await {
+            assert_eq!(paper.pid, pid);
+            assert_eq!(paper.status, paper::Status::Approved);
+        }
+    }
+}

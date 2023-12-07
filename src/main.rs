@@ -1,4 +1,4 @@
-use std::{path::PathBuf, sync::Arc};
+use std::{path::PathBuf, sync::Arc, time::Duration};
 
 use axum::{
     routing::{get, post},
@@ -105,7 +105,16 @@ async fn main() {
             &format!("/{}/{}", config.mng_secret, config.mng_reject_papers_secret),
             post(paper::reject::<FsHandle>),
         )
-        .with_state(state);
+        .with_state(state.clone());
+
+    tokio::spawn(dmds_tokio_fs::daemon(
+        state.papers.clone(),
+        Duration::from_secs(45),
+    ));
+    tokio::spawn(dmds_tokio_fs::daemon(
+        state.questions.clone(),
+        Duration::from_secs(120),
+    ));
 
     axum::serve(
         tokio::net::TcpListener::bind(format!("127.0.0.1:{port}"))

@@ -70,6 +70,7 @@ impl From<In> for Question {
 
 impl dmds::Data for Question {
     const DIMS: usize = 1;
+    const VERSION: u32 = 1;
 
     fn dim(&self, dim: usize) -> u64 {
         match dim {
@@ -78,16 +79,21 @@ impl dmds::Data for Question {
         }
     }
 
-    fn decode<B: bytes::Buf>(dims: &[u64], buf: B) -> std::io::Result<Self> {
-        let inner: Store = bincode::deserialize_from(buf.reader())
-            .map_err(|err| std::io::Error::new(std::io::ErrorKind::Other, err))?;
-        Ok(Self {
-            name: inner.name,
-            info: inner.info,
-            email: inner.email,
-            pid: dims[0],
-            time: inner.time,
-        })
+    fn decode<B: bytes::Buf>(version: u32, dims: &[u64], buf: B) -> std::io::Result<Self> {
+        match version {
+            1 => {
+                let inner: Store = bincode::deserialize_from(buf.reader())
+                    .map_err(|err| std::io::Error::new(std::io::ErrorKind::Other, err))?;
+                Ok(Self {
+                    name: inner.name,
+                    info: inner.info,
+                    email: inner.email,
+                    pid: dims[0],
+                    time: inner.time,
+                })
+            }
+            _ => unreachable!(),
+        }
     }
 
     fn encode<B: bytes::BufMut>(&self, buf: B) -> std::io::Result<()> {

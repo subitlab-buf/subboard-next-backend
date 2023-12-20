@@ -252,9 +252,9 @@ dependencies = [
 
 [[package]]
 name = "dmds"
-version = "0.1.1"
+version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4af1766a337392440cba2e9716800e411acba9f3790fad295108407b91f861a8"
+checksum = "765f1f13a4c262d59979ed04d24790a7776be4854f5b0e8cc169ba1dac53a13e"
 dependencies = [
  "async-lock",
  "async-trait",
@@ -266,9 +266,9 @@ dependencies = [
 
 [[package]]
 name = "dmds-tokio-fs"
-version = "0.1.0"
+version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "981ca5a3128aac81d7ee7449735330079602a4f04d63793b5eb97d56b597f6ec"
+checksum = "dd8ed854a5d73c95b951344d433f0ba3f04f0c41a550e44cf401e815c68cca8f"
 dependencies = [
  "async-trait",
  "bytes",

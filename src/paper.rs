@@ -108,6 +108,7 @@ impl From<In> for Paper {
 
 impl dmds::Data for Paper {
     const DIMS: usize = 2;
+    const VERSION: u32 = 1;
 
     #[inline]
     fn dim(&self, dim: usize) -> u64 {
@@ -118,22 +119,26 @@ impl dmds::Data for Paper {
         }
     }
 
-    fn decode<B: bytes::Buf>(dims: &[u64], buf: B) -> std::io::Result<Self> {
-        let inner: Store = bincode::deserialize_from(buf.reader())
-            .map_err(|err| std::io::Error::new(std::io::ErrorKind::Other, err))?;
-
-        Ok(Self {
-            name: inner.name,
-            info: inner.info,
-            email: inner.email,
-            time: inner.time,
-            pid: dims[0],
-            status: if dims[1] as u8 == Status::Pending as u8 {
-                Status::Pending
-            } else {
-                Status::Approved
-            },
-        })
+    fn decode<B: bytes::Buf>(version: u32, dims: &[u64], buf: B) -> std::io::Result<Self> {
+        match version {
+            1 => {
+                let inner: Store = bincode::deserialize_from(buf.reader())
+                    .map_err(|err| std::io::Error::new(std::io::ErrorKind::Other, err))?;
+                Ok(Self {
+                    name: inner.name,
+                    info: inner.info,
+                    email: inner.email,
+                    time: inner.time,
+                    pid: dims[0],
+                    status: if dims[1] as u8 == Status::Pending as u8 {
+                        Status::Pending
+                    } else {
+                        Status::Approved
+                    },
+                })
+            }
+            _ => unreachable!(),
+        }
     }
 
     fn encode<B: bytes::BufMut>(&self, buf: B) -> std::io::Result<()> {

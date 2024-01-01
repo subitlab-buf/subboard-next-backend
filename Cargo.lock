@@ -252,9 +252,9 @@ dependencies = [
 
 [[package]]
 name = "dmds"
-version = "0.2.0"
+version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "765f1f13a4c262d59979ed04d24790a7776be4854f5b0e8cc169ba1dac53a13e"
+checksum = "492f757cff367fd59b646e503ca1f36bb2d588704873f908db38aa1d08432f8f"
 dependencies = [
  "async-lock",
  "async-trait",

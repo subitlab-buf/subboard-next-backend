@@ -27,11 +27,11 @@ fn router() -> (Global<MemStorage>, Router) {
         config: Arc::new(config),
         papers: Arc::new(dmds::world! {
             // 32 chunks, 2 chunk
-            MemStorage::new(), 576460752303423488 | ..=u64::MAX, 1 | ..=1
+            MemStorage::new(), 576460752303423488u64 | ..=u64::MAX, 1 | ..=1
         }),
         questions: Arc::new(dmds::world! {
             // 32 chunks
-            MemStorage::new(), 1152921504606846976 | ..=u64::MAX
+            MemStorage::new(), 1152921504606846976u64 | ..=u64::MAX
         }),
     };
 

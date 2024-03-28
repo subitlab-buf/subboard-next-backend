@@ -88,7 +88,6 @@ async fn main() {
     };
 
     let router: Router<()> = Router::new()
-        .layer(CorsLayer::permissive())
         .route("/questions/new", post(question::new::<FsHandle>))
         .route("/paper/post", post(paper::post::<FsHandle>))
         .route("/paper/get", get(paper::get::<FsHandle>))
@@ -107,7 +106,8 @@ async fn main() {
             &format!("/{}/{}", config.mng_secret, config.mng_reject_papers_secret),
             post(paper::reject::<FsHandle>),
         )
-        .with_state(state.clone());
+        .with_state(state.clone())
+        .layer(CorsLayer::very_permissive());
 
     tokio::spawn(dmds_tokio_fs::daemon(
         state.papers.clone(),

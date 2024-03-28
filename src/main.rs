@@ -9,6 +9,7 @@ use dmds_tokio_fs::FsHandle;
 use paper::Paper;
 use question::Question;
 use serde::Deserialize;
+use tower_http::cors::CorsLayer;
 
 mod paper;
 mod question;
@@ -105,6 +106,7 @@ async fn main() {
             &format!("/{}/{}", config.mng_secret, config.mng_reject_papers_secret),
             post(paper::reject::<FsHandle>),
         )
+        .layer(CorsLayer::permissive())
         .with_state(state.clone());
 
     tokio::spawn(dmds_tokio_fs::daemon(

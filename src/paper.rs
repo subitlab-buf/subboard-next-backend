@@ -2,6 +2,7 @@ use axum::{extract::State, http::StatusCode, response::IntoResponse, Json};
 use chrono::{DateTime, Utc};
 use dmds::{IoHandle, StreamExt};
 use serde::{Deserialize, Serialize};
+use siphasher::sip::SipHasher24;
 use tracing::{error, info};
 
 use crate::Global;
@@ -87,10 +88,9 @@ impl Paper {
 impl From<In> for Paper {
     fn from(value: In) -> Self {
         let hash = {
-            use std::collections::hash_map::DefaultHasher;
             use std::hash::{Hash, Hasher};
 
-            let mut hasher = DefaultHasher::new();
+            let mut hasher = SipHasher24::new();
             value.hash(&mut hasher);
             hasher.finish()
         };

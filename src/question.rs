@@ -2,6 +2,7 @@ use axum::{extract::State, http::StatusCode, response::IntoResponse, Json};
 use chrono::{DateTime, Utc};
 use dmds::IoHandle;
 use serde::{Deserialize, Serialize};
+use siphasher::sip::SipHasher24;
 
 use crate::Global;
 
@@ -49,11 +50,8 @@ impl Question {
 impl From<In> for Question {
     fn from(value: In) -> Self {
         let hash = {
-            use std::{
-                collections::hash_map::DefaultHasher,
-                hash::{Hash, Hasher},
-            };
-            let mut hasher = DefaultHasher::new();
+            use std::hash::{Hash, Hasher};
+            let mut hasher = SipHasher24::new();
             value.hash(&mut hasher);
             hasher.finish()
         };

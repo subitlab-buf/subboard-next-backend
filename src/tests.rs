@@ -167,7 +167,7 @@ async fn get_paper() {
     };
     let mut paper: paper::Paper = paper.into();
     paper.status = paper::Status::Approved;
-    state.papers.insert(paper.into()).await.unwrap();
+    state.papers.insert(paper).await.unwrap();
 
     let res = route
         .oneshot(
@@ -198,7 +198,7 @@ async fn unprocessed_papers() {
     };
     let mut paper: paper::Paper = paper.into();
     paper.status = paper::Status::Approved;
-    state.papers.insert(paper.into()).await.unwrap();
+    state.papers.insert(paper).await.unwrap();
 
     let paper = paper::In {
         name: "Yjn024".to_owned(),

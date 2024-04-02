@@ -9,6 +9,7 @@ use dmds_tokio_fs::FsHandle;
 use paper::Paper;
 use question::Question;
 use serde::Deserialize;
+use tower_http::services::ServeDir;
 
 mod paper;
 mod question;
@@ -38,6 +39,7 @@ impl<Io: IoHandle> Clone for Global<Io> {
 struct Config {
     db_path: PathBuf,
     port: u32,
+    static_path: PathBuf,
 
     /// Root secret mapping.
     mng_secret: String,
@@ -105,7 +107,8 @@ async fn main() {
             &format!("/{}/{}", config.mng_secret, config.mng_reject_papers_secret),
             post(paper::reject::<FsHandle>),
         )
-        .with_state(state.clone());
+        .with_state(state.clone())
+        .nest_service("/", ServeDir::new(config.static_path.clone()));
 
     tokio::spawn(dmds_tokio_fs::daemon(
         state.papers.clone(),

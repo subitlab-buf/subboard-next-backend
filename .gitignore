@@ -1,1 +1,10 @@
+# Dev
 /target
+
+# Prod
+config.toml
+db/
+static/
+
+# Misc
+.DS_Store

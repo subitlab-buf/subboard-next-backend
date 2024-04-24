@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
+    <title>2024开放日小纸条</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="assets/common.css">
+    <link rel="stylesheet" type="text/css" href="assets/sticky.css">
+    <link rel="stylesheet" type="text/css" href="assets/button.css">
+    <link rel="stylesheet" type="text/css" href="assets/chest.css">
+    <link rel="stylesheet" type="text/css" href="assets/questions.css">
+    <script lang="javascript">
+        function sanitize(str) { return str.trim().replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll("\"", "&quot;").replaceAll("\'", "&apos;").replaceAll("&", "&amp;").replaceAll("\\", "&#92;").replaceAll("\/", "&#47;"); }
+        function postQuestion(name, info, email) {
+            const req = new XMLHttpRequest();
+            const content = JSON.stringify({
+                "name": sanitize(name),
+                "info": sanitize(info),
+                "email": sanitize(email),
+            });
+            req.open("POST", window.location.origin + "/questions/new", true);
+            req.setRequestHeader("content-type", "application/json");
+            req.onreadystatechange = function () {
+                if (req.readyState === 4) {
+                    if (req.status === 200) {
+                        //Display animation
+                        document.getElementById('container').classList.add('shrink');
+                        setTimeout(function () {
+                            document.getElementById("top").classList.remove("open");
+                        }, 1000);
+                    } else {
+                        //Display retry button
+                    }
+                }
+            };
+            req.send(content);
+        }
+        function submit() {
+            const info = document.getElementById("info");
+            const name = document.getElementById("name");
+            const email = document.getElementById("email");
+            if (name.innerText === "20个字以内" || info.innerText === "200个字以内，尽量不要超过5行") {
+                return;
+            }
+            document.getElementById("top").classList.add("open");
+            postQuestion(name.innerText, info.innerText, email.innerText);
+        }
+    </script>
+</head>
+
+<body>
+    <!-- Chest starts -->
+    <div style="position:fixed;right:10%;bottom:10%;" class="chest">
+        <div class="chest__panel chest__panel--back"></div>
+        <div class="chest__panel chest__panel--front">
+            <div class="chest__panel chest__panel--front-frame"></div>
+        </div>
+        <div class="chest__panel chest__panel--top"></div>
+        <div class="chest__panel chest__panel--bottom"></div>
+        <div class="chest__panel chest__panel--left"></div>
+        <div class="chest__panel chest__panel--right"></div>
+        <div class="chest-drawer chest-drawer--top">
+            <details id="top">
+                <summary></summary>
+            </details>
+            <div class="chest-drawer__structure">
+                <div class="chest-drawer__panel chest-drawer__panel--left"></div>
+                <div class="chest-drawer__panel chest-drawer__panel--right"></div>
+                <div class="chest-drawer__panel chest-drawer__panel--bottom"></div>
+                <div class="chest-drawer__panel chest-drawer__panel--back"><b>SubIT</b></div>
+            </div>
+        </div>
+        <div class="chest-drawer chest-drawer--middle">
+            <details id="middle">
+                <summary></summary>
+            </details>
+            <div class="chest-drawer__structure">
+                <div class="chest-drawer__panel chest-drawer__panel--left"></div>
+                <div class="chest-drawer__panel chest-drawer__panel--right"></div>
+                <div class="chest-drawer__panel chest-drawer__panel--bottom"></div>
+                <div class="chest-drawer__panel chest-drawer__panel--back"><b>Inbox</b></div>
+            </div>
+        </div>
+        <div class="chest-drawer chest-drawer--bottom">
+            <details id="bottom">
+                <summary></summary>
+            </details>
+            <div class="chest-drawer__structure">
+                <div class="chest-drawer__panel chest-drawer__panel--left"></div>
+                <div class="chest-drawer__panel chest-drawer__panel--right"></div>
+                <div class="chest-drawer__panel chest-drawer__panel--bottom"></div>
+                <div class="chest-drawer__panel chest-drawer__panel--back"><b>Outbox</b></div>
+            </div>
+        </div>
+    </div>
+    <!-- Chest ends -->
+    <div class="container" id="container">
+        <div class="main sticky tape" style="background-color:var(--yellow);" id="main">
+            <br>
+            <b>昵称*：</b>
+            <div contenteditable="true" style="display: inline;" id="name"
+                onkeydown="if(event.keyCode===13)return false;"
+                onclick="if(event.currentTarget.innerText==='20个字以内')event.currentTarget.innerText=''"
+                onblur="if(event.currentTarget.innerText.length===0)event.currentTarget.innerText='20个字以内'">20个字以内</div>
+            <br>
+            <b>E-mail：</b>
+            <div contenteditable="true" style="display: inline;" id="email"
+                onkeydown="if(event.keyCode===13)return false;"
+                onclick="if(event.currentTarget.innerText==='请使用有效的E-mail格式')event.currentTarget.innerText=''"
+                onblur="if(event.currentTarget.innerText.length===0)event.currentTarget.innerText='请使用有效的E-mail格式'">
+                请使用有效的E-mail格式</div>
+            <br>
+            <b>正文*：</b>
+            <br>
+            <div contenteditable="true" style="display: inline;" id="info"
+                onblur="if(event.currentTarget.innerText.length===0)event.currentTarget.innerText='200个字以内，尽量不要超过5行'"
+                onclick="if(event.currentTarget.innerText==='200个字以内，尽量不要超过5行')event.currentTarget.innerText=''">
+                200个字以内，尽量不要超过5行</div>
+            <a class="submit btn-gradient large yellow" id="submit" onclick="submit()"><b>提交</b></a>
+        </div>
+    </div>
+    <div class="sticky tape success">
+        提交成功，谢谢你！
+        <br>
+        你的疑问（如有）将很快有社员通过你填写的电子邮件进行解答。
+        <a class="return btn-gradient large blue" href="index.html">返回主页</a>
+    </div>
+    <div class="tip sticky tape">
+        <b>Tip</b>
+        <br>
+        如果你需要帮助，请务必留下你的邮箱以便联系
+    </div>
+</body>
+
+</html>

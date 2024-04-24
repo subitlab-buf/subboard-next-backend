@@ -1,0 +1,165 @@
+/*
+Author: kissrobber
+GitHub: https://github.com/kissrobber/css3-flyaway-sticky
+*/
+
+.sticky {
+  padding: 2%;
+  box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5),
+    1px 1px 3px rgba(0, 0, 0, 0.5);
+
+  animation: anime1 1s linear 0s infinite alternate;
+  -webkit-animation: anime1 1s linear 0s infinite alternate;
+  -moz-animation: anime1 1s linear 0s infinite alternate;
+  -ms-animation: anime1 1s linear 0s infinite alternate;
+
+  transform-style: preserve-3d;
+  -webkit-transform-style: preserve-3d;
+  -moz-transform-style: preserve-3d;
+  -ms-transform-style: preserve-3d;
+
+  transform-origin: 100% 0;
+  -webkit-transform-origin: 100% 0;
+  -moz-transform-origin: 100% 0;
+  -ms-transform-origin: 100% 0;
+
+  transform: skew(-1deg, 0deg);
+  -webkit-transform: skew(-1deg, 0deg);
+  -moz-transform: skew(-1deg, 0deg);
+  -ms-transform: skew(-1deg, 0deg);
+}
+
+@keyframes anime1 {
+  0% {
+    transform: skew(-1deg, 0deg);
+    border-radius: 0 0 0px 0 / 0 0 0px 0;
+    box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5),
+      1px 1px 3px rgba(0, 0, 0, 0.5);
+  }
+  100% {
+    transform: skew(-4deg, 0deg);
+    border-radius: 0 1px 5px 50% / 0 30% 70% 4px;
+    box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5),
+      3px 6px 3px rgba(0, 0, 0, 0.5);
+  }
+}
+
+@-webkit-keyframes anime1 {
+  0% {
+    -webkit-transform: skew(-1deg, 0deg);
+    -webkit-border-radius: 0 0 0px 0 / 0 0 0px 0;
+    -webkit-box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5),
+      1px 1px 3px rgba(0, 0, 0, 0.5);
+    transform: skew(-1deg, 0deg);
+    border-radius: 0 0 0px 0 / 0 0 0px 0;
+    box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5),
+      1px 1px 3px rgba(0, 0, 0, 0.5);
+  }
+  100% {
+    -webkit-transform: skew(-4deg, 0deg);
+    -webkit-border-radius: 0 1px 5px 50% / 0 30% 70% 4px;
+    -webkit-box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5),
+      3px 6px 3px rgba(0, 0, 0, 0.5);
+    transform: skew(-4deg, 0deg);
+    border-radius: 0 1px 5px 50% / 0 30% 70% 4px;
+    box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5),
+      3px 6px 3px rgba(0, 0, 0, 0.5);
+  }
+}
+
+
+@-moz-keyframes anime1 {
+  0% {
+    -moz-transform: skew(-1deg, 0deg);
+    -moz-border-radius: 0 0 0px 0 / 0 0 0px 0;
+    -moz-box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5),
+      1px 1px 3px rgba(0, 0, 0, 0.5);
+    transform: skew(-1deg, 0deg);
+    border-radius: 0 0 0px 0 / 0 0 0px 0;
+    box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5),
+      1px 1px 3px rgba(0, 0, 0, 0.5);
+  }
+  100% {
+    -moz-transform: skew(-4deg, 0deg);
+    -moz-border-radius: 0 1px 5px 50% / 0 30% 70% 4px;
+    -moz-box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5),
+      3px 6px 3px rgba(0, 0, 0, 0.5);
+    transform: skew(-4deg, 0deg);
+    border-radius: 0 1px 5px 50% / 0 30% 70% 4px;
+    box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5),
+      3px 6px 3px rgba(0, 0, 0, 0.5);
+  }
+}
+
+@-ms-keyframes anime1 {
+  0% {
+    -ms-transform: skew(-1deg, 0deg);
+    -ms-border-radius: 0 0 0px 0 / 0 0 0px 0;
+    -ms-box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5),
+      1px 1px 3px rgba(0, 0, 0, 0.5);
+    transform: skew(-1deg, 0deg);
+    border-radius: 0 0 0px 0 / 0 0 0px 0;
+    box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5),
+      1px 1px 3px rgba(0, 0, 0, 0.5);
+  }
+  100% {
+    -ms-transform: skew(-4deg, 0deg);
+    -ms-border-radius: 0 1px 5px 50% / 0 30% 70% 4px;
+    -ms-box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5),
+      3px 6px 3px rgba(0, 0, 0, 0.5);
+    transform: skew(-4deg, 0deg);
+    border-radius: 0 1px 5px 50% / 0 30% 70% 4px;
+    box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5),
+      3px 6px 3px rgba(0, 0, 0, 0.5);
+  }
+}
+
+.sticky-outer {
+  position: relative;
+  padding: 0px;
+  padding-top: 20px;
+}
+
+.sticky-outer:after{
+  position: absolute;
+  content: "";
+  width: 40px;
+  height: 40px;
+  top: -5px;
+  left: 50%;
+  background-image: url('pin_red.png');
+  background-repeat: no-repeat;
+}
+
+.sticky-outer .sticky:before{
+  position: absolute;
+  content: "";
+  width: 40px;
+  height: 40px;
+  top: 15px;
+  left: 50%;
+  background-image: url('pin_shadow.png');
+  background-repeat: no-repeat;
+}
+
+.sticky.tape:before{
+  position: absolute;
+  content: "";
+  width: 30%;
+  height: 30px;
+  top: -15px;
+  left: 35%;
+  border: solid 1px rgba(137,130,48,.2);
+  background: -moz-linear-gradient(top, rgba(254,243,127,.3) 0%, rgba(240,224,54,.3) 100%);
+  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(254,243,127,.3)), color-stop(100%,rgba(240,224,54,.3)));
+  background: linear-gradient(top, rgba(254,243,127,.3) 0%,rgba(240,224,54,.3) 100%);
+
+  -webkit-box-shadow: inset 0 1px 0 rgba(255,255,255,.3), 0 1px 0 rgba(0,0,0,.2);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.3), 0 1px 0 rgba(0,0,0,.2);
+
+  transform: rotate(2deg);
+  -webkit-transform: rotate(2deg);
+  -mod-transform: rotate(2deg);
+  -ms-transform: rotate(2deg);
+
+}

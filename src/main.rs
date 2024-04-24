@@ -38,6 +38,10 @@ impl<Io: IoHandle> Clone for Global<Io> {
 #[derive(Debug, Deserialize)]
 struct Config {
     db_path: PathBuf,
+    #[serde(default)]
+    log_path: Option<PathBuf>,
+    #[serde(default)]
+    log_level: Option<String>,
     port: u32,
 
     /// Root secret mapping.
@@ -53,26 +57,43 @@ struct Config {
 
 #[tokio::main]
 async fn main() {
-    tracing_subscriber::fmt::init();
-
+    const CONFIG_PATH: &str = "config.toml";
     let config: Config = toml::from_str(&{
         use std::io::Read;
         let mut str = String::new();
-        std::fs::File::open("config.toml")
+        std::fs::File::open(CONFIG_PATH)
             .unwrap()
             .read_to_string(&mut str)
             .unwrap();
         str
     })
     .unwrap();
-    let port = config.port;
 
+    tracing_subscriber::fmt::init();
+    if let Some(path) = &config.log_path {
+        tracing_subscriber::fmt()
+            .with_max_level(
+                config
+                    .log_level
+                    .as_ref()
+                    .and_then(|str| str.parse::<tracing::Level>().ok())
+                    .unwrap_or(tracing::Level::INFO),
+            )
+            .with_writer(
+                std::fs::OpenOptions::new()
+                    .create(true)
+                    .append(true)
+                    .open(path)
+                    .expect("failed to create log file"),
+            )
+            .init();
+    }
+
+    let port = config.port;
     let mut paper_path = config.db_path.clone();
     paper_path.push("papers");
-
     let mut questions_path = config.db_path.clone();
     questions_path.push("questions");
-
     let config = Arc::new(config);
 
     let state = Global {
@@ -88,7 +109,10 @@ async fn main() {
     };
 
     let router: Router<()> = Router::new()
-        .layer(TraceLayer::new_for_http())
+        .layer(
+            TraceLayer::new_for_http()
+                .on_request(tower_http::trace::DefaultOnRequest::new().level(tracing::Level::INFO)),
+        )
         .route("/questions/new", post(question::new::<FsHandle>))
         .route("/paper/post", post(paper::post::<FsHandle>))
         .route("/paper/get", get(paper::get::<FsHandle>))

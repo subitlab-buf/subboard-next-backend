@@ -52,9 +52,9 @@ dependencies = [
 
 [[package]]
 name = "async-lock"
-version = "3.2.0"
+version = "3.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7125e42787d53db9dd54261812ef17e937c95a51e4d291373b670342fa44310c"
+checksum = "d034b430882f8381900d3fe6f0aaa3ad94f2cb4ac519b429692a1bc2dda4ae7b"
 dependencies = [
  "event-listener",
  "event-listener-strategy",
@@ -260,12 +260,11 @@ dependencies = [
 
 [[package]]
 name = "dmds"
-version = "0.2.2"
+version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "378c5c867d4f71ce0ba34d27982d9783ee405fd77e7c58317e71e6dcc830d6a5"
+checksum = "80365beb994e31522b7d67b389986618a89570feb004192c2d4ba5ef334e11c7"
 dependencies = [
  "async-lock",
- "async-trait",
  "bytes",
  "dashmap",
  "futures-lite",
@@ -274,11 +273,10 @@ dependencies = [
 
 [[package]]
 name = "dmds-tokio-fs"
-version = "0.2.0"
+version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dd8ed854a5d73c95b951344d433f0ba3f04f0c41a550e44cf401e815c68cca8f"
+checksum = "b40a4829bfe78f05567e3a8711f221aa80faefd7cf88f5e136ffd3077fd79259"
 dependencies = [
- "async-trait",
  "bytes",
  "dashmap",
  "dmds",
@@ -390,9 +388,9 @@ checksum = "a44623e20b9681a318efdd71c299b6b222ed6f231972bfe2f224ebad6311f0c1"
 
 [[package]]
 name = "futures-lite"
-version = "2.1.0"
+version = "2.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "aeee267a1883f7ebef3700f262d2d54de95dfaf38189015a74fdc4e0c7ad8143"
+checksum = "52527eb5074e35e9339c6b4e8d12600c7128b68fb25dcb9fa9dec18f7c25f3a5"
 dependencies = [
  "fastrand",
  "futures-core",

@@ -7,8 +7,8 @@ edition = "2021"
 
 [dependencies]
 axum = "0.7"
-dmds = "0.2"
-dmds-tokio-fs = "0.2"
+dmds = "0.4.0"
+dmds-tokio-fs = "0.3.0"
 tokio = { version = "1.37", features = ["full"] }
 tracing = "0.1"
 tracing-subscriber = "0.3"

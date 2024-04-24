@@ -108,7 +108,7 @@ async fn main() {
             post(paper::reject::<FsHandle>),
         )
         .with_state(state.clone())
-        .nest_service("/", ServeDir::new(config.static_path.clone()));
+        .fallback_service(ServeDir::new(config.static_path.clone()));
 
     tokio::spawn(dmds_tokio_fs::daemon(
         state.papers.clone(),

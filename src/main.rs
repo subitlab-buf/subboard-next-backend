@@ -43,7 +43,7 @@ struct Config {
     log_path: Option<PathBuf>,
     #[serde(default)]
     log_level: Option<String>,
-    port: u32,
+    address: String,
     static_path: PathBuf,
 
     /// Root secret mapping.
@@ -91,7 +91,6 @@ async fn main() {
             .init();
     }
 
-    let port = config.port;
     let mut paper_path = config.db_path.clone();
     paper_path.push("papers");
     let mut questions_path = config.db_path.clone();
@@ -149,7 +148,7 @@ async fn main() {
     info!("backend initialized");
 
     axum::serve(
-        tokio::net::TcpListener::bind(format!("127.0.0.1:{port}"))
+        tokio::net::TcpListener::bind(&config.address)
             .await
             .unwrap(),
         router,

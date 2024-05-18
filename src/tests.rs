@@ -16,7 +16,7 @@ fn router() -> (Global<MemStorage>, Router) {
 
     let config = Config {
         db_path: PathBuf::new(),
-        port: 8080,
+        address: "".to_owned(),
         static_path: PathBuf::new(),
         mng_secret: "secret".to_owned(),
         mng_get_papers_secret: "get_papers".to_owned(),

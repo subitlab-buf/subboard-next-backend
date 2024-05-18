@@ -31,6 +31,7 @@ pub struct Paper {
     time: DateTime<Utc>,
 
     pub status: Status,
+    pub color: String,
 }
 
 /// Paper from frontend.
@@ -39,6 +40,7 @@ pub struct In {
     pub name: String,
     pub info: String,
     pub email: Option<lettre::Address>,
+    pub color: String,
 }
 
 /// Paper to frontend.
@@ -48,15 +50,25 @@ pub struct Out {
     pub info: String,
     pub email: Option<lettre::Address>,
     pub pid: u64,
+    color: String,
     time: DateTime<Utc>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-struct Store {
+struct StoreV1 {
     name: String,
     info: String,
     email: Option<lettre::Address>,
     time: DateTime<Utc>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+struct StoreV2 {
+    name: String,
+    info: String,
+    email: Option<lettre::Address>,
+    time: DateTime<Utc>,
+    color: String,
 }
 
 impl Paper {
@@ -72,11 +84,12 @@ impl Paper {
             email: self.email.clone(),
             pid: self.pid,
             time: self.time,
+            color: self.color.clone(),
         }
     }
 
-    fn to_store(&self) -> Store {
-        Store {
+    fn to_store(&self) -> StoreV1 {
+        StoreV1 {
             name: self.name.clone(),
             info: self.info.clone(),
             email: self.email.clone(),
@@ -102,13 +115,14 @@ impl From<In> for Paper {
             pid: hash,
             time: Utc::now(),
             status: Status::Pending,
+            color: value.color,
         }
     }
 }
 
 impl dmds::Data for Paper {
     const DIMS: usize = 2;
-    const VERSION: u32 = 1;
+    const VERSION: u32 = 2;
 
     #[inline]
     fn dim(&self, dim: usize) -> u64 {
@@ -122,7 +136,7 @@ impl dmds::Data for Paper {
     fn decode<B: bytes::Buf>(version: u32, dims: &[u64], buf: B) -> std::io::Result<Self> {
         match version {
             1 => {
-                let inner: Store = bincode::deserialize_from(buf.reader())
+                let inner: StoreV1 = bincode::deserialize_from(buf.reader())
                     .map_err(|err| std::io::Error::new(std::io::ErrorKind::Other, err))?;
                 Ok(Self {
                     name: inner.name,
@@ -135,6 +149,24 @@ impl dmds::Data for Paper {
                     } else {
                         Status::Approved
                     },
+                    color: "#ffffcc".to_owned(),
+                })
+            }
+            2 => {
+                let inner: StoreV2 = bincode::deserialize_from(buf.reader())
+                    .map_err(|err| std::io::Error::new(std::io::ErrorKind::Other, err))?;
+                Ok(Self {
+                    name: inner.name,
+                    info: inner.info,
+                    email: inner.email,
+                    time: inner.time,
+                    pid: dims[0],
+                    status: if dims[1] as u8 == Status::Pending as u8 {
+                        Status::Pending
+                    } else {
+                        Status::Approved
+                    },
+                    color: inner.color,
                 })
             }
             _ => unreachable!(),

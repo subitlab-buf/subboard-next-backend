@@ -99,6 +99,7 @@ async fn post_paper() {
         name: "Yjn024".to_owned(),
         info: "Hello, world!".to_owned(),
         email: None,
+        color: "#ffc".to_owned(),
     };
 
     assert!(route
@@ -145,6 +146,7 @@ async fn get_paper() {
         name: "Yjn024".to_owned(),
         info: "Hello, world!".to_owned(),
         email: None,
+        color: "#ffc".to_owned(),
     };
     state.papers.insert(paper.into()).await.unwrap();
 
@@ -166,6 +168,7 @@ async fn get_paper() {
         name: "Yjn024".to_owned(),
         info: "Genshine Impact".to_owned(),
         email: None,
+        color: "#ffc".to_owned(),
     };
     let mut paper: paper::Paper = paper.into();
     paper.status = paper::Status::Approved;
@@ -197,6 +200,7 @@ async fn unprocessed_papers() {
         name: "Yjn024".to_owned(),
         info: "Genshine Impact".to_owned(),
         email: None,
+        color: "#ffc".to_owned(),
     };
     let mut paper: paper::Paper = paper.into();
     paper.status = paper::Status::Approved;
@@ -206,6 +210,7 @@ async fn unprocessed_papers() {
         name: "Yjn024".to_owned(),
         info: "Hello, world!".to_owned(),
         email: None,
+        color: "#ffc".to_owned(),
     };
     state.papers.insert(paper.into()).await.unwrap();
 
@@ -213,6 +218,7 @@ async fn unprocessed_papers() {
         name: "c191239".to_owned(),
         info: "Hello, world!".to_owned(),
         email: None,
+        color: "#ffc".to_owned(),
     };
     state.papers.insert(paper.into()).await.unwrap();
 
@@ -239,6 +245,7 @@ async fn approve_paper() {
         name: "Yjn024".to_owned(),
         info: "Genshine Impact".to_owned(),
         email: None,
+        color: "#ffc".to_owned(),
     }
     .into();
     let pid = paper.pid;

@@ -10,6 +10,7 @@ use paper::Paper;
 use question::Question;
 use serde::Deserialize;
 use tower_http::{cors::CorsLayer, services::ServeDir, trace::TraceLayer};
+use tracing::info;
 
 mod paper;
 mod question;
@@ -144,6 +145,8 @@ async fn main() {
         state.questions.clone(),
         Duration::from_secs(120),
     ));
+
+    info!("backend initialized");
 
     axum::serve(
         tokio::net::TcpListener::bind(format!("127.0.0.1:{port}"))

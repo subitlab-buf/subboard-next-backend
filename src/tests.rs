@@ -254,8 +254,9 @@ async fn approve_paper() {
     assert!(route
         .oneshot(
             Request::builder()
-                .uri("/secret/get_papers")
-                .method(http::Method::GET)
+                .uri("/secret/approve_papers")
+                .method(http::Method::POST)
+                .header(http::header::CONTENT_TYPE, mime::APPLICATION_JSON.as_ref())
                 .body(serde_json::to_string(&paper::ApprRejReq { pid }).unwrap())
                 .unwrap(),
         )
@@ -264,10 +265,7 @@ async fn approve_paper() {
         .status()
         .is_success());
 
-    let select = state
-        .papers
-        .select(0, pid)
-        .and(1, paper::Status::Approved as u8 as u64);
+    let select = state.papers.select(0, pid);
     let mut iter = select.iter();
 
     while let Some(Ok(lazy)) = iter.next().await {

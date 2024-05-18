@@ -276,10 +276,7 @@ pub async fn approve<Io: IoHandle>(
     State(Global { papers, .. }): State<Global<Io>>,
     Json(ApprRejReq { pid }): Json<ApprRejReq>,
 ) -> Result<(), Error> {
-    let select = papers
-        .select(0, pid)
-        .and(1, Status::Pending as u8 as u64)
-        .hint(pid);
+    let select = papers.select(0, pid).hint(pid);
     let mut papers_iter = select.iter();
 
     while let Some(Ok(mut lazy)) = papers_iter.next().await {
@@ -302,10 +299,7 @@ pub async fn reject<Io: IoHandle>(
     State(Global { papers, .. }): State<Global<Io>>,
     Json(ApprRejReq { pid }): Json<ApprRejReq>,
 ) -> Result<(), Error> {
-    let select = papers
-        .select(0, pid)
-        .and(1, Status::Pending as u8 as u64)
-        .hint(pid);
+    let select = papers.select(0, pid).hint(pid);
     let mut papers_iter = select.iter();
 
     while let Some(Ok(lazy)) = papers_iter.next().await {

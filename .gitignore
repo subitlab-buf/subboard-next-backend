@@ -3,7 +3,7 @@
 
 # Prod
 config.toml
-db/
 
-# Misc
 .DS_Store
+/db
+/logs

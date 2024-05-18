@@ -22,6 +22,8 @@ fn router() -> (Global<MemStorage>, Router) {
         mng_get_papers_secret: "get_papers".to_owned(),
         mng_approve_papers_secret: "approve_papers".to_owned(),
         mng_reject_papers_secret: "reject_papers".to_owned(),
+        log_path: None,
+        log_level: None,
     };
 
     let state = Global {

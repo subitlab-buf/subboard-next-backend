@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
+    <title>2024开放日小纸条</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="assets/common.css">
+    <link rel="stylesheet" type="text/css" href="assets/sticky.css">
+    <link rel="stylesheet" type="text/css" href="assets/button.css">
+    <link rel="stylesheet" type="text/css" href="assets/chest.css">
+    <link rel="stylesheet" type="text/css" href="assets/paper.css">
+    <script lang="javascript">
+        function sanitize(str) { return str.trim().replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll("\"", "&quot;").replaceAll("\'", "&apos;").replaceAll("&", "&amp;").replaceAll("\\", "&#92;").replaceAll("\/", "&#47;"); }
+        function postPaper(name, info, email, color) {
+            const req = new XMLHttpRequest();
+            const content = JSON.stringify({
+                "name": sanitize(name),
+                "info": sanitize(info),
+                "email": sanitize(email),
+                "color": color,
+            });
+            req.open("POST", window.location.origin + "/paper/post", true);
+            req.setRequestHeader("content-type", "application/json");
+            req.onreadystatechange = function () {
+                if (req.readyState === 4) {
+                    if (req.status === 200) {
+                        //Display animation
+                        document.getElementById('container').classList.add('shrink');
+                        setTimeout(function () {
+                            document.getElementById("middle").classList.remove("open");
+                        }, 1000);
+                    } else {
+                        //Display retry button
+                    }
+                }
+            };
+            req.send(content);
+        }
+        function changeColor() {
+            document.getElementsByName("color").forEach(function (value, key, parent) {
+                if (value.checked) {
+                    switch (value.value) {
+                        case "yellow":
+                            document.getElementById("main").style.backgroundColor = "var(--yellow)";
+                            document.getElementById("submit").className = "submit btn-gradient large " + value.value;
+                            break;
+                        case "blue":
+                            document.getElementById("main").style.backgroundColor = "var(--blue)";
+                            document.getElementById("submit").className = "submit btn-gradient large " + value.value;
+                            break;
+                        case "purple":
+                            document.getElementById("main").style.backgroundColor = "var(--purple)";
+                            document.getElementById("submit").className = "submit btn-gradient large " + value.value;
+                            break;
+                        case "green":
+                            document.getElementById("main").style.backgroundColor = "var(--green)";
+                            document.getElementById("submit").className = "submit btn-gradient large " + value.value;
+                            break;
+                        case "red":
+                            document.getElementById("main").style.backgroundColor = "var(--red)";
+                            document.getElementById("submit").className = "submit btn-gradient large " + value.value;
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            });
+        }
+        function submit() {
+            const info = document.getElementById("info");
+            const name = document.getElementById("name");
+            const email = document.getElementById("email");
+            var color;
+            document.getElementsByName("color").forEach(function (value, key, parent) {
+                if (value.checked) {
+                    switch (value.value) {
+                        case "yellow":
+                            color = "#ffc";
+                            break;
+                        case "blue":
+                            color = "#cff";
+                            break;
+                        case "purple":
+                            color = "#ccf";
+                            break;
+                        case "green":
+                            color = "#cfc";
+                            break;
+                        case "red":
+                            color = "#fcc";
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            });
+            if (name.innerText === "20个字以内" || info.innerText === "200个字以内，尽量不要超过5行") {
+                return;
+            }
+            document.getElementById("middle").classList.add("open");
+            document.getElementsByName("color").forEach(function (value, key, parent) { value.disabled = true; });
+            postPaper(name.innerText, info.innerText, email.innerText, color);
+        }
+        function getPaper() {
+            const req = new XMLHttpRequest();
+            req.open("GET", window.location.origin + "/paper/get", true);
+            req.onreadystatechange = function () {
+                if (req.readyState === 4) {
+                    if (req.status === 200) {
+                        //Process paper
+                        document.getElementById("name").innerText = res.name;
+                        document.getElementById("info").innerText = res.info;
+                        document.getElementsByName("color").forEach(function (value, key, parent) {
+                            if (value.checked) { value.checked = false; }
+                            var colorName;
+                            switch (res.color) {
+                                case "#ffc":
+                                    colorName = "yellow";
+                                    break;
+                                case "#cff":
+                                    colorName = "blue";
+                                    break;
+                                case "#ccf":
+                                    colorName = "purple";
+                                    break;
+                                case "#cfc":
+                                    colorName = "green";
+                                    break;
+                                case "#fcc":
+                                    colorName = "red";
+                                    break;
+                                default:
+                                    break;
+                            }
+                            if (value.value === colorName) {
+                                value.checked = true;
+                                document.getElementById("main").style.backgroundColor = "var(--" + colorName + ")";
+                                document.getElementById("home").classList.add(colorName);
+                            }
+                        });
+                        document.getElementById("container").classList.remove("shrink");
+                        setTimeout(function () {
+                            document.getElementById("bottom").classList.remove("open");
+                        }, 1000);
+                    } else {
+                        //Display retry button
+                    }
+                }
+            };
+            req.send();
+        }
+        function random() {
+            document.getElementById("bottom").classList.add("open");
+            document.getElementById("hidden1").hidden = true;
+            document.getElementById("hidden2").hidden = true;
+            document.getElementById("return").hidden = false;
+            getPaper();
+        }
+    </script>
+</head>
+
+<body>
+    <!-- Chest starts -->
+    <div style="position:fixed;right:10%;bottom:10%;" class="chest">
+        <div class="chest__panel chest__panel--back"></div>
+        <div class="chest__panel chest__panel--front">
+            <div class="chest__panel chest__panel--front-frame"></div>
+        </div>
+        <div class="chest__panel chest__panel--top"></div>
+        <div class="chest__panel chest__panel--bottom"></div>
+        <div class="chest__panel chest__panel--left"></div>
+        <div class="chest__panel chest__panel--right"></div>
+        <div class="chest-drawer chest-drawer--top">
+            <details id="top">
+                <summary></summary>
+            </details>
+            <div class="chest-drawer__structure">
+                <div class="chest-drawer__panel chest-drawer__panel--left"></div>
+                <div class="chest-drawer__panel chest-drawer__panel--right"></div>
+                <div class="chest-drawer__panel chest-drawer__panel--bottom"></div>
+                <div class="chest-drawer__panel chest-drawer__panel--back"><b>SubIT</b></div>
+            </div>
+        </div>
+        <div class="chest-drawer chest-drawer--middle">
+            <details id="middle">
+                <summary></summary>
+            </details>
+            <div class="chest-drawer__structure">
+                <div class="chest-drawer__panel chest-drawer__panel--left"></div>
+                <div class="chest-drawer__panel chest-drawer__panel--right"></div>
+                <div class="chest-drawer__panel chest-drawer__panel--bottom"></div>
+                <div class="chest-drawer__panel chest-drawer__panel--back"><b>Inbox</b></div>
+            </div>
+        </div>
+        <div class="chest-drawer chest-drawer--bottom">
+            <details id="bottom">
+                <summary></summary>
+            </details>
+            <div class="chest-drawer__structure">
+                <div class="chest-drawer__panel chest-drawer__panel--left"></div>
+                <div class="chest-drawer__panel chest-drawer__panel--right"></div>
+                <div class="chest-drawer__panel chest-drawer__panel--bottom"></div>
+                <div class="chest-drawer__panel chest-drawer__panel--back"><b>Outbox</b></div>
+            </div>
+        </div>
+    </div>
+    <!-- Chest ends -->
+    <div class="container" id="container">
+        <div class="main sticky tape" style="background-color:var(--yellow);" id="main">
+            <br>
+            <b>昵称*：</b>
+            <div contenteditable="true" style="display: inline;" id="name"
+                onkeydown="if(event.keyCode===13)return false;"
+                onclick="if(event.currentTarget.innerText==='20个字以内')event.currentTarget.innerText=''"
+                onblur="if(event.currentTarget.innerText.length===0)event.currentTarget.innerText='20个字以内'">20个字以内</div>
+            <div id="hidden1">
+                <b>E-mail：</b>
+                <div contenteditable="true" style="display: inline;" id="email"
+                    onkeydown="if(event.keyCode===13)return false;"
+                    onclick="if(event.currentTarget.innerText==='请使用有效的E-mail格式')event.currentTarget.innerText=''"
+                    onblur="if(event.currentTarget.innerText.length===0)event.currentTarget.innerText='请使用有效的E-mail格式'">
+                    请使用有效的E-mail格式</div>
+            </div>
+            <br>
+            <b>正文*：</b>
+            <br>
+            <div contenteditable="true" style="display: inline;" id="info"
+                onblur="if(event.currentTarget.innerText.length===0)event.currentTarget.innerText='200个字以内，尽量不要超过5行'"
+                onclick="if(event.currentTarget.innerText==='200个字以内，尽量不要超过5行')event.currentTarget.innerText=''">
+                200个字以内，尽量不要超过5行</div>
+            <div id="hidden2">
+                <a class="submit btn-gradient large yellow" id="submit" onclick="submit()"><b>提交</b></a>
+            </div>
+            <div id="return" hidden>
+                <a class="return btn-gradient large" href="index.html" id="home">返回主页</a>
+            </div>
+        </div>
+    </div>
+    <div class="settings sticky tape">
+        <b>便签颜色</b><br>
+        <div onchange="changeColor()">
+            <input type="radio" name="color" value="yellow" checked>黄色</input>
+            <input type="radio" name="color" value="blue">蓝色</input>
+            <input type="radio" name="color" value="purple">紫色</input>
+            <input type="radio" name="color" value="green">绿色</input>
+            <input type="radio" name="color" value="red">红色</input>
+        </div>
+    </div>
+    <div class="sticky tape success">
+        小纸条提交成功，谢谢你的参与！
+        <br>
+        点击按钮可以抽一张来自其他人的小纸条
+        <a class="random btn-gradient large yellow" onclick="random()">抽一张</a>
+    </div>
+</body>
+
+</html>

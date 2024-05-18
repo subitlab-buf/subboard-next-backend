@@ -1,4 +1,5 @@
 db_path = "./db"
+static_path = "./static"
 port = 8080
 
 # Secret mappings

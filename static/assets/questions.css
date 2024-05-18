@@ -1,0 +1,51 @@
+.main {
+    position: fixed;
+    width: 60%;
+    height: 60%;
+    left: 15%;
+    top: 5%;
+}
+
+.tip {
+    position: fixed;
+    width: 20%;
+    height: 20%;
+    left: 10%;
+    bottom: 10%;
+    background-color: var(--blue);
+}
+
+.submit {
+    position: fixed;
+    right: 2%;
+    bottom: 2%;
+}
+
+.container {
+    position: fixed;
+    width: 60%;
+    height: 60%;
+    left: 15%;
+    top: 5%;
+    transition: transform 1s;
+    z-index: 100;
+}
+
+.shrink {
+    transform: scale(0.05) translate(1400%, 1400%);
+}
+
+.success {
+    background-color: var(--blue);
+    position: fixed;
+    width: 30%;
+    height: 30%;
+    left: 30%;
+    top: 20%;
+}
+
+.return {
+    position: fixed;
+    right: 2%;
+    bottom: 2%;
+}

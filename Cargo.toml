@@ -21,8 +21,8 @@ bincode = "1.3"
 toml = "0.8"
 thiserror = "1.0"
 fastrand = "2.1"
+tower-http = { version = "0.5", features = ["fs", "trace"] }
 siphasher = "1.0"
-tower-http = { version = "0.5", features = ["cors", "trace"] }
 
 [dev-dependencies]
 tower = "0.4"
@@ -32,4 +32,4 @@ hyper = { version = "1.2", features = ["full"] }
 http-body-util = "0.1"
 
 [profile.release]
-lto = "thin"
+lto = "fat"

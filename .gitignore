@@ -1,4 +1,9 @@
+# Dev
 /target
+
+# Prod
 config.toml
+
+.DS_Store
 /db
 /logs

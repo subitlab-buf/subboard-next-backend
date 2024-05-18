@@ -1,0 +1,11 @@
+body {
+    background-image: url(toprowbg.gif);
+    --magenta: #fcf;
+    --yellow: #ffc;
+    --blue: #cff;
+    --purple: #ccf;
+    --green: #cfc;
+    --red: #fcc;
+    overflow: hidden;
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+}

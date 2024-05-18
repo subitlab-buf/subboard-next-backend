@@ -9,7 +9,7 @@ use dmds_tokio_fs::FsHandle;
 use paper::Paper;
 use question::Question;
 use serde::Deserialize;
-use tower_http::services::ServeDir;
+use tower_http::{services::ServeDir, trace::TraceLayer};
 
 mod paper;
 mod question;
